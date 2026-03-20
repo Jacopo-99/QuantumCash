@@ -5,6 +5,8 @@ from backend.services import calcola_prelievo
 from backend.db import engine, SessionLocal
 from backend.db_models import Base, PrelievoDB, StoricoAWPDB
 
+from backend.ai_agent import analizza_prelievo
+
 # 🔧 crea tabelle DB
 Base.metadata.create_all(bind=engine)
 
@@ -22,6 +24,14 @@ def root():
 def crea_prelievo(data: PrelievoInput):
     db = SessionLocal()
     result = calcola_prelievo(data, db)
+
+    # ❌ se errore → NON chiamare agente
+    if "error" in result:
+        return result
+
+    analisi = analizza_prelievo(result)
+    result["analisi"] = analisi
+
 
     # ❌ se errore logico blocca tutto
     if "error" in result:
