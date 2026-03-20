@@ -20,7 +20,8 @@ def root():
 # 🚀 CREA PRELIEVO
 @app.post("/prelievo")
 def crea_prelievo(data: PrelievoInput):
-    result = calcola_prelievo(data)
+    db = SessionLocal()
+    result = calcola_prelievo(data, db)
 
     # ❌ se errore logico blocca tutto
     if "error" in result:
@@ -45,12 +46,20 @@ def crea_prelievo(data: PrelievoInput):
 
     # 📊 aggiorna storico AWP
     for awp in data.awps:
-        storico = StoricoAWPDB(
+        storico = db.query(StoricoAWPDB)\
+        .filter(StoricoAWPDB.awp_id == awp.awp_id)\
+        .first()
+
+    if storico:
+        storico.ultimo_cassetto = awp.cassetto_attuale
+        storico.ultimo_refill = awp.refill_attuale
+    else:
+        nuovo = StoricoAWPDB(
             awp_id=awp.awp_id,
             ultimo_cassetto=awp.cassetto_attuale,
             ultimo_refill=awp.refill_attuale
         )
-        db.add(storico)
+        db.add(nuovo)
 
     db.commit()
     db.close()
@@ -62,6 +71,7 @@ def crea_prelievo(data: PrelievoInput):
 @app.get("/prelievi")
 def get_prelievi():
     db = SessionLocal()
+    result = calcola_prelievo(data, db)
     prelievi = db.query(PrelievoDB).all()
     db.close()
     return prelievi

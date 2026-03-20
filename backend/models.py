@@ -9,15 +9,14 @@ class AWPInput(BaseModel):
     refill_attuale: float
 
 class StoricoAWP(BaseModel):
-    awp_id: str
-    ultimo_cassetto: float
+    awp_id: int
+    ultimo_cassetto: float  # Make sure the type is here!
     ultimo_refill: float
-    
+
 class PrelievoInput(BaseModel):
     locale_id: str
     collector_id: str
     awps: List[AWPInput]
-    storico: List[StoricoAWP]  # 👈 nuovo
     anticipo: float = 0
     contante_dichiarato: float
 
