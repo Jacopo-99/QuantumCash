@@ -13,3 +13,5 @@ class PrelievoInput(BaseModel):
     collector_id: str
     awps: List[AWPInput]
     anticipo: float = 0
+
+    contante_dichiarato: float  # quanto ha fisicamente l'esattore
